@@ -33,7 +33,7 @@ Proceso gestionFerreteria
 	productosDescripcion[1,0] <- "2"
 	productosDescripcion[1,1] <- "Lija"
 	productosPreciosCantidades[1,0] <- 2
-	productosPreciosCantidades[1,1] <- 55.40
+	productosPreciosCantidades[1,1] <- 25.40
 	productosPreciosCantidades[1,2] <- 183
 	
 	productosDescripcion[2,0] <- "4"
@@ -49,20 +49,29 @@ Proceso gestionFerreteria
 	productosPreciosCantidades[3,2] <- 17
 	
 	definir cantidadProductosRegistrados como entero //Cantidad de productos que estan registrados, va a aumentar en caso de agregar nuevos
-	cantidadProductosRegistrados <- 4
-	
+	cantidadProductosRegistrados <- 4 //AUMENTARÁ SI REGISTRAMOS NUEVOS ARTÍCULOS
+	definir nombreABuscar como cadena
 	
 	Repetir //Bucle para el menu
 		opcionMenu <- menu();
 		Segun opcionMenu Hacer
 			1: //Registrar Venta
+				registrarVenta(ventasDiarias, indiceVenta, productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
 			2: //Ver listado de productos ordenados por código
 				ordernarArregloTextoASC(productosDescripcion,cantidadProductosRegistrados,2,0) //Se utilizan dos ordenamientos, uno para texto otro para reales.
 				ordernarArregloRealesASC(productosPreciosCantidades,cantidadProductosRegistrados,3,0)
 				listadoProductos(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados) //Se muestra el arreglo ordenado
 			3: //Ver resumen de ventas (Debe haber una venta registrada)
+				verResumenDiario(ventasDiarias,indiceVenta,5)
 			4: //Modificacion del stock (Artículos, unidades, precios)
+				Limpiar Pantalla
+				Escribir menuStock()
 			5: //Buscar artículo por nombre
+				Escribir "Ingrese el nombre del artículo a buscar:"
+				Leer nombreABuscar
+				nombreArticulo <- buscarProductoNombre(productosDescripcion,cantidadProductosRegistrados,nombreABuscar)
+				Limpiar Pantalla
+				mostrarProductoNombre(productosDescripcion, productosPreciosCantidades, nombreArticulo)
 			6: //Salir
 				Escribir "¡Saludos!"
 		Fin Segun
@@ -82,6 +91,21 @@ Funcion return<-menu() //Retorna eleccion en el menu
 		Escribir "6. Salir"
 		Leer op_menu
 	Mientras Que (op_menu<1 o op_menu>6)
+	return <- op_menu
+FinFuncion
+
+
+Funcion return<-menuStock() //Retorna eleccion en el menu de stock
+	Definir op_menu Como Entero;
+	Repetir
+		Escribir "Seleccione la opción que desee realizar: "
+		Escribir "1. Registrar nuevo producto"
+		Escribir "2. Modificar unidades de un producto"
+		Escribir "3. Modificar precio de un producto"
+		Escribir "4. Modificar descripción de un producto"
+		Escribir "5. Volver al menú principal"
+		Leer op_menu
+	Mientras Que (op_menu<1 o op_menu>5)
 	return <- op_menu
 FinFuncion
 
@@ -131,9 +155,9 @@ Funcion return<- buscarPrecioProducto(listaDeProductos,n,elementoABuscar) //Busq
 	i<-0;
 	elementoEncontrado <- Falso;
 	Mientras i <= n-1 y no elementoEncontrado
-		si listaDeProductos[i,0] == elementoABuscar Entonces //DEFINIR PARAMETROS DE BUSQUEDA
+		si listaDeProductos[i,0] == elementoABuscar Entonces 
 			elementoEncontrado <- Verdadero; //fuerzo la salida del bucle
-			precioProducto <- listaDeProductos[i,1] //DEFINIR PARAMETROS DE BUSQUEDA
+			precioProducto <- listaDeProductos[i,1]
 		FinSi
 		i <- i +1; 
 	FinMientras
@@ -151,7 +175,7 @@ SubProceso listadoProductos(descripcion, preciosCantidades, n) //Se muestra la l
 FinSubProceso
 
 
-SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia) //FALTA AGREGAR PARAMETROS E INCLUIRLO EN MENU
+SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia, productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
 	Definir codProducto, cantidad, medioPago Como Entero;
 	Definir dniCliente Como Caracter;
 	definir verListado Como Logico
@@ -159,7 +183,7 @@ SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia) //FALTA AGR
 	definir iva Como Real
 	iva <- 0.21
 	Repetir
-		Escribir "Ingrese el dni del cliente";
+		Escribir "Ingrese el DNI del cliente";
 		Leer dniCliente;
 	Mientras Que Longitud(dniCliente)<6 o Longitud(dniCliente)>8
 	
@@ -190,7 +214,7 @@ SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia) //FALTA AGR
 		FinSi
 	FinSi
 	
-	precioProducto <- buscarPrecioProducto(productosPrecio,cantidadProductosRegistrados,codProducto); //Recupero el precio del producto con el codigo que ingreso el usuario
+	precioProducto <- buscarPrecioProducto(productosPreciosCantidades,cantidadProductosRegistrados,codProducto); //Recupero el precio del producto con el codigo que ingreso el usuario
 	precioFinal <- ((precioProducto-(precioProducto*descuento))*cantidad)+(((precioProducto-(precioProducto*descuento))*cantidad)*iva) //REVISAR SI ESTA OK LA ECUACION
 	//                Precio producto -  Descuento       *    Cantidad  (+   IVA de ese total)
 	ventasDiarias[indiceVenta,0]<-dniCliente
@@ -203,4 +227,36 @@ SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia) //FALTA AGR
 	Limpiar Pantalla;
 	Escribir "Su venta ha sido registrada"
 	Escribir "-----------------------------------"
+FinSubProceso
+
+
+SubProceso verResumenDiario(ventas,n,m) //Muestra el resumen diario de ventas
+	Limpiar Pantalla
+	Escribir "Resumen diario: "
+	Escribir "  DNI  -   MED PAGO - CODPROD -  CANT - $ TOTAL "
+	mostrarArray(ventas,n,m);
+	Escribir "-----------------------------------";
+FinSubProceso
+
+Funcion return<- buscarProductoNombre(listaDeProductos,n,elementoABuscar) //Busqueda de producto para precio
+	Definir i Como Entero;
+	i<-0;
+	elementoEncontrado <- Falso;
+	Mientras i <= n-1 y no elementoEncontrado
+		si listaDeProductos[i,1] == elementoABuscar Entonces 
+			elementoEncontrado <- Verdadero; //fuerzo la salida del bucle
+			nombreProducto <- i
+		FinSi
+		i <- i +1; 
+	FinMientras
+	return	<- nombreProducto
+FinFuncion
+
+
+SubProceso mostrarProductoNombre(descripcion, preciosCantidades, nombreProd) //Muestra array bidimensional de unico producto
+	i <- nombreProd
+
+Escribir "COD -  NOMBRE  -  PRECIO  -  STOCK "
+Escribir descripcion[i,0], "    ", descripcion[i,1], "    ",preciosCantidades[i,1],"    ",preciosCantidades[i,2]
+Escribir "-----------------------------------"
 FinSubProceso
