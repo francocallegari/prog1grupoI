@@ -8,6 +8,7 @@
 //https://github.com/francocallegari/prog1grupoI.git
 
 Proceso gestionFerreteria
+	Definir opcionMenu, opcionMenuStock Como Entero;
 	Definir ventasDiarias como cadena //Areglo de registro de ventas
 	Dimension ventasDiarias[350,5]
 	definir indiceVenta Como Entero
@@ -62,14 +63,17 @@ Proceso gestionFerreteria
 				ordernarArregloRealesASC(productosPreciosCantidades,cantidadProductosRegistrados,3,0)
 				listadoProductos(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados) //Se muestra el arreglo ordenado
 			3: //Ver resumen de ventas (Debe haber una venta registrada)
-				verResumenDiario(ventasDiarias,indiceVenta,5)
+				si indiceVenta > 0 Entonces
+					verResumenDiario(ventasDiarias,indiceVenta,5)
+				SiNo
+					Escribir "Debe registrar al menos una venta para ver el resumen";
+				FinSi				
 			4: //Modificacion del stock (Artículos, unidades, precios)
-				Limpiar Pantalla
-				Escribir menuStock()
+				modificarStock(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
 			5: //Buscar artículo por nombre
 				Escribir "Ingrese el nombre del artículo a buscar:"
 				Leer nombreABuscar
-				nombreArticulo <- buscarProductoNombre(productosDescripcion,cantidadProductosRegistrados,nombreABuscar)
+				nombreArticulo <- buscarElemento(productosDescripcion,cantidadProductosRegistrados, 1,nombreABuscar)
 				Limpiar Pantalla
 				mostrarProductoNombre(productosDescripcion, productosPreciosCantidades, nombreArticulo)
 			6: //Salir
@@ -230,6 +234,94 @@ SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia, productosDe
 FinSubProceso
 
 
+SubProceso modificarStock(productosDescripcion, productosPreciosCantidades Por Referencia, cantidadProductosRegistrados Por Referencia )
+	Limpiar Pantalla
+	Repetir //Bucle para el menu stock
+		opcionMenuStock <- menuStock();
+		Segun opcionMenuStock Hacer
+			1: //Registrar producto nuevo
+				registrarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
+			2: //Modifica unidades de un producto
+				modificarUnidadProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
+			3: //Modificar precio de un producto
+				Escribir "3. Modificar precio de un producto"
+			4: //Modificar descripción de un producto
+				Escribir "4. Modificar descripción de un producto"
+			5: //Retorno al menu principal
+				Escribir "Regresando al menu principal..."
+		Fin Segun
+	Hasta Que opcionMenuStock == 5
+FinSubProceso
+
+
+SubProceso registrarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados Por Referencia)
+	Limpiar Pantalla
+	Definir codProducto, stockProducto Como Entero
+	Definir nomProducto Como Caracter
+	Definir precioProducto Como Real
+
+	Escribir "Ingrese el nombre del artículo"
+	Leer nomProducto
+
+	Repetir
+		Escribir "Ingrese el precio del producto";
+		Leer precioProducto;
+	Mientras Que precioProducto<=0
+	
+	Repetir
+		Escribir "Ingrese el stock del producto";
+		Leer stockProducto;
+	Mientras Que stockProducto<=0
+	
+	productosDescripcion[cantidadProductosRegistrados,0] <- ConvertirATexto(cantidadProductosRegistrados+1)
+	productosPreciosCantidades[cantidadProductosRegistrados,0] <- cantidadProductosRegistrados+1
+	productosDescripcion[cantidadProductosRegistrados,1] <- nomProducto
+	productosPreciosCantidades[cantidadProductosRegistrados,1] <- precioProducto
+	productosPreciosCantidades[cantidadProductosRegistrados,2] <- stockProducto
+	
+	cantidadProductosRegistrados<-cantidadProductosRegistrados+1;
+	Limpiar Pantalla;
+	Escribir "Su producto ha sido registrado"
+	Escribir "-----------------------------------"
+FinSubProceso
+
+
+SubProceso modificarUnidadProducto(productosDescripcion, productosPreciosCantidades Por Referencia, cantidadProductosRegistrados Por Referencia)
+	Limpiar Pantalla	
+	Definir codProducto, stockProducto, indiceProducto Como Entero
+	definir verListado Como Logico
+	verListado <- Falso
+	indiceProducto <- -1;
+	
+	Escribir "¿Desea ver el listado de productos? Escriba V/F"
+	Leer verListado
+	si verListado == Verdadero Entonces
+		listadoProductos(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
+	FinSi
+	
+	Repetir
+		Escribir "Ingrese el codigo del producto que desea modificar";
+		Leer codProducto;
+	Mientras Que codProducto<1 o codProducto>cantidadProductosRegistrados
+	
+	Repetir
+		Escribir "Ingrese el nuevo stock del producto";
+		Leer stockProducto;
+	Mientras Que stockProducto<=0
+	
+	indiceProducto <- buscarElemento(productosPreciosCantidades,cantidadProductosRegistrados,0,codProducto);
+	
+	Limpiar Pantalla;
+	Si indiceProducto >= 0 Entonces //modifico el stock del producto seleccionado
+		productosPreciosCantidades[indiceProducto,2] <- stockProducto
+		Escribir "Su producto ha sido modificado exitosamente"
+		Escribir "-----------------------------------"	
+	SiNo
+		Escribir "Producto no encontrado";
+	FinSi
+FinSubProceso
+
+
 SubProceso verResumenDiario(ventas,n,m) //Muestra el resumen diario de ventas
 	Limpiar Pantalla
 	Escribir "Resumen diario: "
@@ -238,25 +330,35 @@ SubProceso verResumenDiario(ventas,n,m) //Muestra el resumen diario de ventas
 	Escribir "-----------------------------------";
 FinSubProceso
 
-Funcion return<- buscarProductoNombre(listaDeProductos,n,elementoABuscar) //Busqueda de producto para precio
+
+SubProceso mostrarProductoNombre(descripcion, preciosCantidades, nombreProd) //Muestra array bidimensional de unico producto
+	i <- nombreProd
+	
+	Si nombreProd >= 0 Entonces //muestro el detalle del producto buscado
+		Escribir "COD -  NOMBRE  -  PRECIO  -  STOCK "
+		Escribir descripcion[i,0], "    ", descripcion[i,1], "    ",preciosCantidades[i,1],"    ",preciosCantidades[i,2]
+		Escribir "-----------------------------------"
+	SiNo
+		Escribir "Producto no encontrado";
+	FinSi
+FinSubProceso
+
+
+// RETORNO EL INDICE DEL ELEMENTO ENCONTRADO, EN CASO CONTRARIO (elemento no encontrado) RETORNO -1
+Funcion return<- buscarElemento(array,n,columnaAbuscar,elementoABuscar)
 	Definir i Como Entero;
 	i<-0;
 	elementoEncontrado <- Falso;
 	Mientras i <= n-1 y no elementoEncontrado
-		si listaDeProductos[i,1] == elementoABuscar Entonces 
-			elementoEncontrado <- Verdadero; //fuerzo la salida del bucle
-			nombreProducto <- i
+		si array[i,columnaAbuscar] == elementoABuscar Entonces
+			elementoEncontrado <- Verdadero;
+		SiNo
+			i <- i +1; 
 		FinSi
-		i <- i +1; 
 	FinMientras
-	return	<- nombreProducto
+	Si elementoEncontrado Entonces
+		return <- i;
+	SiNo
+		return <- -1;
+	FinSi
 FinFuncion
-
-
-SubProceso mostrarProductoNombre(descripcion, preciosCantidades, nombreProd) //Muestra array bidimensional de unico producto
-	i <- nombreProd
-
-Escribir "COD -  NOMBRE  -  PRECIO  -  STOCK "
-Escribir descripcion[i,0], "    ", descripcion[i,1], "    ",preciosCantidades[i,1],"    ",preciosCantidades[i,2]
-Escribir "-----------------------------------"
-FinSubProceso
