@@ -49,12 +49,31 @@ Proceso gestionFerreteria
 	productosPreciosCantidades[3,1] <- 255.30
 	productosPreciosCantidades[3,2] <- 17
 	
+	definir menuPrincipal como cadena
+	dimension menuPrincipal[6,1]
+	
+	menuPrincipal[0,0] <- "1. Registrar Venta"
+	menuPrincipal[1,0] <- "2. Ver listado de productos ordenados por código"
+	menuPrincipal[2,0] <- "3. Ver resumen de ventas"
+	menuPrincipal[3,0] <- "4. Modificacion del stock (Artículos, unidades, precios)"
+	menuPrincipal[4,0] <- "5. Buscar artículo por nombre"
+	menuPrincipal[5,0] <- "6. Salir"
+	
+	definir menuDeStock como cadena
+	dimension menuDeStock[5,1]
+	
+	menuDeStock[0,0] <- "1. Registrar nuevo producto"
+	menuDeStock[1,0] <- "2. Modificar unidades de un producto"
+	menuDeStock[2,0] <- "3. Modificar precio de un producto"
+	menuDeStock[3,0] <- "4. Modificar descripción de un producto"
+	menuDeStock[4,0] <- "5. Volver al menú principal"
+	
 	definir cantidadProductosRegistrados como entero //Cantidad de productos que estan registrados, va a aumentar en caso de agregar nuevos
 	cantidadProductosRegistrados <- 4 //AUMENTARÁ SI REGISTRAMOS NUEVOS ARTÍCULOS
 	definir nombreABuscar como cadena
 	
 	Repetir //Bucle para el menu
-		opcionMenu <- menu();
+		opcionMenu <- menu(menuPrincipal,6);
 		Segun opcionMenu Hacer
 			1: //Registrar Venta
 				registrarVenta(ventasDiarias, indiceVenta, productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
@@ -69,7 +88,7 @@ Proceso gestionFerreteria
 					Escribir "Debe registrar al menos una venta para ver el resumen";
 				FinSi				
 			4: //Modificacion del stock (Artículos, unidades, precios)
-				modificarStock(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
+				modificarStock(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados,menuDeStock)
 			5: //Buscar artículo por nombre
 				Escribir "Ingrese el nombre del artículo a buscar:"
 				Leer nombreABuscar
@@ -83,33 +102,13 @@ Proceso gestionFerreteria
 FinProceso
 
 
-Funcion return<-menu() //Retorna eleccion en el menu
+Funcion return<-menu(menuOpciones,i) //Retorna eleccion en el menu
 	Definir op_menu Como Entero;
 	Repetir
 		Escribir "Seleccione la opción que desee realizar: "
-		Escribir "1. Registrar Venta"
-		Escribir "2. Ver listado de productos ordenados por código"
-		Escribir "3. Ver resumen de ventas"
-		Escribir "4. Modificacion del stock (Artículos, unidades, precios)"
-		Escribir "5. Buscar artículo por nombre"
-		Escribir "6. Salir"
+		mostrarArray(menuOpciones,i,1)
 		Leer op_menu
-	Mientras Que (op_menu<1 o op_menu>6)
-	return <- op_menu
-FinFuncion
-
-
-Funcion return<-menuStock() //Retorna eleccion en el menu de stock
-	Definir op_menu Como Entero;
-	Repetir
-		Escribir "Seleccione la opción que desee realizar: "
-		Escribir "1. Registrar nuevo producto"
-		Escribir "2. Modificar unidades de un producto"
-		Escribir "3. Modificar precio de un producto"
-		Escribir "4. Modificar descripción de un producto"
-		Escribir "5. Volver al menú principal"
-		Leer op_menu
-	Mientras Que (op_menu<1 o op_menu>5)
+	Mientras Que (op_menu<1 o op_menu>i)
 	return <- op_menu
 FinFuncion
 
@@ -200,6 +199,9 @@ SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia, productosDe
 	Repetir
 		Escribir "Ingrese la cantidad pedida";
 		Leer cantidad;
+		Si cantidad>productosPreciosCantidades[indiceStock,2] Entonces
+			Escribir "La cantidad ingresada supera el stock disponible";
+		FinSi
 	Mientras Que cantidad<=0 o cantidad>productosPreciosCantidades[indiceStock,2]
 	
 	Repetir
@@ -232,10 +234,10 @@ SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia, productosDe
 FinSubProceso
 
 
-SubProceso modificarStock(productosDescripcion, productosPreciosCantidades Por Referencia, cantidadProductosRegistrados Por Referencia )
+SubProceso modificarStock(productosDescripcion, productosPreciosCantidades Por Referencia, cantidadProductosRegistrados Por Referencia, menuDeStock)
 	Limpiar Pantalla
 	Repetir //Bucle para el menu stock
-		opcionMenuStock <- menuStock();
+		opcionMenuStock <- menu(menuDeStock,5);
 		Segun opcionMenuStock Hacer
 			1: //Registrar producto nuevo
 				registrarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
