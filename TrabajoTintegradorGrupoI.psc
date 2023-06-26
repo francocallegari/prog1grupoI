@@ -214,16 +214,16 @@ SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia, productosDe
 		Mientras Que medioPago<0 o medioPago>2
 		
 		si medioPago == 0 Entonces
-			descuento <- 0.05
+			descuento <- 0.95
 		sino si medioPago == 1 entonces
-				descuento <- 0.03
-			sino descuento = 0
+				descuento <- 0.97
+			sino descuento = 1
 			FinSi
 		FinSi
 		
 		precioProducto <- buscarPrecioProducto(productosPreciosCantidades,cantidadProductosRegistrados,codProducto); //Recupero el precio del producto con el codigo que ingreso el usuario
-		precioFinal <- ((precioProducto-(precioProducto*descuento))*cantidad)+(((precioProducto-(precioProducto*descuento))*cantidad)*iva) //REVISAR SI ESTA OK LA ECUACION
-		//                Precio producto -  Descuento       *    Cantidad  (+   IVA de ese total)
+		precioFinal <- ((precioProducto*descuento)*cantidad)*1.21;
+		//          Precio producto *  Descuento  *  Cantidad  +   IVA de ese total
 		ventasDiarias[indiceVenta,0]<-dniCliente
 		ventasDiarias[indiceVenta,1]<-ConvertirATexto(medioPago)
 		ventasDiarias[indiceVenta,2]<-ConvertirATexto(codProducto)
