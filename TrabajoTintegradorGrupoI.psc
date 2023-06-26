@@ -181,13 +181,14 @@ FinSubProceso
 SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia, productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
 	Definir codProducto, cantidad, medioPago Como Entero;
 	Definir dniCliente Como Caracter;
-	definir verListado Como Logico
-	verListado <- Falso
 	definir iva Como Real
 	iva <- 0.21
 	Repetir
 		Escribir "Ingrese el DNI del cliente";
 		Leer dniCliente;
+		Si Longitud(dniCliente)<6 o Longitud(dniCliente)>8 Entonces
+			Escribir "El largo del dni ingresado no es valido";
+		FinSi
 	Mientras Que Longitud(dniCliente)<6 o Longitud(dniCliente)>8
 	
 	visualizarListado(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados) //consulto si quiere ver el listado de productos
@@ -196,41 +197,45 @@ SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia, productosDe
 
 	indiceStock <- buscarElemento(productosPreciosCantidades,cantidadProductosRegistrados,0,codProducto); //busco el indice del codigo del producto para ver que stock tengo disponible
 	
-	Repetir
-		Escribir "Ingrese la cantidad pedida";
-		Leer cantidad;
-		Si cantidad>productosPreciosCantidades[indiceStock,2] Entonces
-			Escribir "La cantidad ingresada supera el stock disponible";
+	Si productosPreciosCantidades[indiceStock,2]=0 Entonces
+		Escribir "No es posible realizar la venta, ya que no hay unidades disponibles del producto";
+	SiNo
+		Repetir
+			Escribir "Ingrese la cantidad pedida";
+			Leer cantidad;
+			Si cantidad>productosPreciosCantidades[indiceStock,2] Entonces
+				Escribir "La cantidad ingresada supera el stock disponible";
+			FinSi
+		Mientras Que cantidad<=0 o cantidad>productosPreciosCantidades[indiceStock,2]
+		
+		Repetir
+			Escribir "Ingrese el medio de pago 0-Efectivo, 1-Debito, 2-Credito"
+			Leer medioPago;
+		Mientras Que medioPago<0 o medioPago>2
+		
+		si medioPago == 0 Entonces
+			descuento <- 0.05
+		sino si medioPago == 1 entonces
+				descuento <- 0.03
+			sino descuento = 0
+			FinSi
 		FinSi
-	Mientras Que cantidad<=0 o cantidad>productosPreciosCantidades[indiceStock,2]
-	
-	Repetir
-		Escribir "Ingrese el medio de pago 0-Efectivo, 1-Debito, 2-Credito"
-		Leer medioPago;
-	Mientras Que medioPago<0 o medioPago>2
-	
-	si medioPago == 0 Entonces
-		descuento <- 0.05
-	sino si medioPago == 1 entonces
-			descuento <- 0.03
-		sino descuento = 0
-		FinSi
+		
+		precioProducto <- buscarPrecioProducto(productosPreciosCantidades,cantidadProductosRegistrados,codProducto); //Recupero el precio del producto con el codigo que ingreso el usuario
+		precioFinal <- ((precioProducto-(precioProducto*descuento))*cantidad)+(((precioProducto-(precioProducto*descuento))*cantidad)*iva) //REVISAR SI ESTA OK LA ECUACION
+		//                Precio producto -  Descuento       *    Cantidad  (+   IVA de ese total)
+		ventasDiarias[indiceVenta,0]<-dniCliente
+		ventasDiarias[indiceVenta,1]<-ConvertirATexto(medioPago)
+		ventasDiarias[indiceVenta,2]<-ConvertirATexto(codProducto)
+		ventasDiarias[indiceVenta,3]<-ConvertirATexto(cantidad)
+		ventasDiarias[indiceVenta,4]<-ConvertirATexto(precioFinal) //CALCULO EL MONTO FINAL
+		
+		modificarArray(productosPreciosCantidades, indiceStock, 2, productosPreciosCantidades[indiceStock,2]-cantidad) //se descuenta del stock la cantidad de unidades vendidas
+		indiceVenta<-indiceVenta+1;
+		Limpiar Pantalla;
+		Escribir "Su venta ha sido registrada"
+		Escribir "-----------------------------------"
 	FinSi
-	
-	precioProducto <- buscarPrecioProducto(productosPreciosCantidades,cantidadProductosRegistrados,codProducto); //Recupero el precio del producto con el codigo que ingreso el usuario
-	precioFinal <- ((precioProducto-(precioProducto*descuento))*cantidad)+(((precioProducto-(precioProducto*descuento))*cantidad)*iva) //REVISAR SI ESTA OK LA ECUACION
-	//                Precio producto -  Descuento       *    Cantidad  (+   IVA de ese total)
-	ventasDiarias[indiceVenta,0]<-dniCliente
-	ventasDiarias[indiceVenta,1]<-ConvertirATexto(medioPago)
-	ventasDiarias[indiceVenta,2]<-ConvertirATexto(codProducto)
-	ventasDiarias[indiceVenta,3]<-ConvertirATexto(cantidad)
-	ventasDiarias[indiceVenta,4]<-ConvertirATexto(precioFinal) //CALCULO EL MONTO FINAL
-	
-	modificarArray(productosPreciosCantidades, indiceStock, 2, productosPreciosCantidades[indiceStock,2]-cantidad) //se descuenta del stock la cantidad de unidades vendidas
-	indiceVenta<-indiceVenta+1;
-	Limpiar Pantalla;
-	Escribir "Su venta ha sido registrada"
-	Escribir "-----------------------------------"
 FinSubProceso
 
 
@@ -241,12 +246,12 @@ SubProceso modificarStock(productosDescripcion, productosPreciosCantidades Por R
 		Segun opcionMenuStock Hacer
 			1: //Registrar producto nuevo
 				registrarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
-			2: //Modifica unidades de un producto
-				modificarUnidadProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
+			2: //Modifica stock de un producto
+				modificarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados, 0)
 			3: //Modificar precio de un producto
-				modificarPrecioProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
+				modificarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados, 1)
 			4: //Modificar descripción de un producto
-				modificarDescripcionProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
+				modificarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados, 2)
 			5: //Retorno al menu principal
 				Escribir "Regresando al menu principal..."
 		Fin Segun
@@ -286,29 +291,10 @@ SubProceso registrarProducto(productosDescripcion, productosPreciosCantidades, c
 FinSubProceso
 
 
-SubProceso modificarUnidadProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados Por Referencia)
-	Limpiar Pantalla	
+SubProceso modificarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados Por Referencia, tipoDato)
+	Limpiar Pantalla
 	Definir codProducto, stockProducto, indiceProducto Como Entero
-	indiceProducto <- -1;
-	
-	visualizarListado(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados) //consulto si quiere ver el listado de productos
-	
-	codProducto <- leerCodProducto(cantidadProductosRegistrados) //le pido al usuario que ingrese el codigo del producto
-
-	Repetir
-		Escribir "Ingrese el nuevo stock del producto";
-		Leer stockProducto;
-	Mientras Que stockProducto<=0
-	
-	indiceProducto <- buscarElemento(productosPreciosCantidades,cantidadProductosRegistrados,0,codProducto);
-	
-	modificarArray(productosPreciosCantidades, indiceProducto, 2, stockProducto)
-FinSubProceso
-
-
-SubProceso modificarPrecioProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados Por Referencia)
-	Limpiar Pantalla	
-	Definir codProducto, indiceProducto Como Entero
+	Definir descripcionProducto Como Caracter
 	Definir precioProducto Como Real
 	indiceProducto <- -1;
 	
@@ -316,35 +302,28 @@ SubProceso modificarPrecioProducto(productosDescripcion, productosPreciosCantida
 	
 	codProducto <- leerCodProducto(cantidadProductosRegistrados) //le pido al usuario que ingrese el codigo del producto
 	
-	Repetir
-		Escribir "Ingrese el nuevo precio del producto";
-		Leer precioProducto;
-	Mientras Que precioProducto<=0
-	
 	indiceProducto <- buscarElemento(productosPreciosCantidades,cantidadProductosRegistrados,0,codProducto);
 	
-	modificarArray(productosPreciosCantidades, indiceProducto, 1, precioProducto)
-FinSubProceso
-
-
-SubProceso modificarDescripcionProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados Por Referencia)
-	Limpiar Pantalla	
-	Definir codProducto, indiceProducto Como Entero
-	Definir descripcionProducto Como Caracter
-	indiceProducto <- -1;
-	
-	visualizarListado(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados) //consulto si quiere ver el listado de productos
-	
-	codProducto <- leerCodProducto(cantidadProductosRegistrados) //le pido al usuario que ingrese el codigo del producto
-	
-	Repetir
-		Escribir "Ingrese la nueva descripcion del producto";
-		Leer descripcionProducto;
-	Mientras Que Longitud(descripcionProducto)<=0
-	
-	indiceProducto <- buscarElemento(productosPreciosCantidades,cantidadProductosRegistrados,0,codProducto);
-	
-	modificarArray(productosDescripcion, indiceProducto, 1, descripcionProducto)
+	Segun tipoDato Hacer
+		0:
+			Repetir
+				Escribir "Ingrese el nuevo stock del producto";
+				Leer stockProducto;
+			Mientras Que stockProducto<=0
+			modificarArray(productosPreciosCantidades, indiceProducto, 2, stockProducto)
+		1:
+			Repetir
+				Escribir "Ingrese el nuevo precio del producto";
+				Leer precioProducto;
+			Mientras Que precioProducto<=0
+			modificarArray(productosPreciosCantidades, indiceProducto, 1, precioProducto)
+		2:
+			Repetir
+				Escribir "Ingrese la nueva descripcion del producto";
+				Leer descripcionProducto;
+			Mientras Que Longitud(descripcionProducto)<=0
+			modificarArray(productosDescripcion, indiceProducto, 1, descripcionProducto)
+	Fin Segun
 FinSubProceso
 
 
