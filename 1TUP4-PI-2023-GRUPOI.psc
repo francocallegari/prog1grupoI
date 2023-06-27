@@ -57,7 +57,7 @@ Proceso gestionFerreteria
 	menuPrincipal[2,0] <- "3. Ver resumen de ventas"
 	menuPrincipal[3,0] <- "4. Modificacion del stock (Artículos, unidades, precios)"
 	menuPrincipal[4,0] <- "5. Buscar artículo por nombre"
-	menuPrincipal[5,0] <- "6. Salir"
+	menuPrincipal[5,0] <- "Si desea finalizar, escriba Salir"
 	
 	definir menuDeStock como cadena
 	dimension menuDeStock[6,1]
@@ -108,6 +108,8 @@ Funcion return<-menu(menuOpciones,i) //Retorna eleccion en el menu
 	definir opcionElegida como cadena
 	Definir palabraSalir como cadena 
 	palabraSalir <- "salir" //Palabra clave para salir del programa
+	definir eleccion como logico //Variable para salir del bucle
+	eleccion <- Falso
 	
 	Repetir
 		Escribir "Seleccione la opción que desee realizar: "
@@ -116,9 +118,13 @@ Funcion return<-menu(menuOpciones,i) //Retorna eleccion en el menu
 		opcionElegida <- Minusculas(opcionElegida)
 		si opcionElegida ==  palabraSalir Entonces
 			op_menu <- 6
-		sino op_menu <- ConvertirANumero(opcionElegida)
+			eleccion <- verdadero
+			sino si ConvertirANumero(opcionElegida) > 0 y ConvertirANumero(opcionElegida) <= i
+				op_menu <- ConvertirANumero(opcionElegida)
+				eleccion <- Verdadero
+			fin si
 		FinSi
-	Mientras Que (op_menu<1 o op_menu>i)
+	Mientras Que eleccion == falso
 	return <- op_menu
 FinFuncion
 
