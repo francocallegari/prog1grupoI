@@ -60,13 +60,14 @@ Proceso gestionFerreteria
 	menuPrincipal[5,0] <- "6. Salir"
 	
 	definir menuDeStock como cadena
-	dimension menuDeStock[5,1]
+	dimension menuDeStock[6,1]
 	
 	menuDeStock[0,0] <- "1. Registrar nuevo producto"
 	menuDeStock[1,0] <- "2. Modificar unidades de un producto"
 	menuDeStock[2,0] <- "3. Modificar precio de un producto"
 	menuDeStock[3,0] <- "4. Modificar descripción de un producto"
-	menuDeStock[4,0] <- "5. Volver al menú principal"
+	menuDeStock[4,0] <- "5. Eliminar Registro"
+	menuDeStock[5,0] <- "6. Volver al menú principal"
 	
 	definir cantidadProductosRegistrados como entero //Cantidad de productos que estan registrados, va a aumentar en caso de agregar nuevos
 	cantidadProductosRegistrados <- 4 //AUMENTARÁ SI REGISTRAMOS NUEVOS ARTÍCULOS
@@ -242,7 +243,7 @@ FinSubProceso
 SubProceso modificarStock(productosDescripcion, productosPreciosCantidades Por Referencia, cantidadProductosRegistrados Por Referencia, menuDeStock)
 	Limpiar Pantalla
 	Repetir //Bucle para el menu stock
-		opcionMenuStock <- menu(menuDeStock,5);
+		opcionMenuStock <- menu(menuDeStock,6);
 		Segun opcionMenuStock Hacer
 			1: //Registrar producto nuevo
 				registrarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
@@ -252,10 +253,12 @@ SubProceso modificarStock(productosDescripcion, productosPreciosCantidades Por R
 				modificarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados, 1)
 			4: //Modificar descripción de un producto
 				modificarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados, 2)
-			5: //Retorno al menu principal
+			5: //Elimino un registro
+				eliminarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
+			6: //Retorno al menu principal
 				Escribir "Regresando al menu principal..."
 		Fin Segun
-	Hasta Que opcionMenuStock == 5
+	Hasta Que opcionMenuStock == 6
 FinSubProceso
 
 
@@ -324,6 +327,29 @@ SubProceso modificarProducto(productosDescripcion, productosPreciosCantidades, c
 			Mientras Que Longitud(descripcionProducto)<=0
 			modificarArray(productosDescripcion, indiceProducto, 1, descripcionProducto)
 	Fin Segun
+FinSubProceso
+
+
+SubProceso eliminarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados Por Referencia)
+	Limpiar Pantalla
+	Definir codProducto, stockProducto, indiceProducto Como Entero
+	Definir descripcionProducto Como Caracter
+	Definir precioProducto Como Real
+	indiceProducto <- -1;
+	
+	visualizarListado(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados) //consulto si quiere ver el listado de productos
+	
+	codProducto <- leerCodProducto(cantidadProductosRegistrados) //le pido al usuario que ingrese el codigo del producto
+	
+	indiceProducto <- buscarElemento(productosPreciosCantidades,cantidadProductosRegistrados,0,codProducto);
+	
+	actualizarArray(productosDescripcion,cantidadProductosRegistrados,2,indiceProducto, 0)
+	actualizarArray(productosPreciosCantidades,cantidadProductosRegistrados,3,indiceProducto, 1)
+
+	cantidadProductosRegistrados<-cantidadProductosRegistrados-1;
+	Limpiar Pantalla;
+	Escribir "Su producto ha sido eliminado"
+	Escribir "-----------------------------------"	
 FinSubProceso
 
 
@@ -400,3 +426,17 @@ Funcion return<- buscarElemento(array,n,columnaAbuscar,elementoABuscar)
 		return <- -1;
 	FinSi
 FinFuncion
+
+
+SubProceso actualizarArray(array,n,m,indiceProducto, tipoDato)
+	para i<-indiceProducto hasta n-2 Hacer		
+		para j<-0 hasta m-1 Hacer
+			array[i,j] <- array[i+1,j];
+		FinPara
+		si tipoDato==0 Entonces
+			modificarArray(array,i,0,ConvertirATexto(i+1))
+		SiNo
+			modificarArray(array,i,0,i+1)
+		FinSi
+	FinPara
+FinSubProceso
