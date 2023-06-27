@@ -105,10 +105,19 @@ FinProceso
 
 Funcion return<-menu(menuOpciones,i) //Retorna eleccion en el menu
 	Definir op_menu Como Entero;
+	definir opcionElegida como cadena
+	Definir palabraSalir como cadena 
+	palabraSalir <- "salir" //Palabra clave para salir del programa
+	
 	Repetir
 		Escribir "Seleccione la opción que desee realizar: "
 		mostrarArray(menuOpciones,i,1)
-		Leer op_menu
+		leer opcionElegida
+		opcionElegida <- Minusculas(opcionElegida)
+		si opcionElegida ==  palabraSalir Entonces
+			op_menu <- 6
+		sino op_menu <- ConvertirANumero(opcionElegida)
+		FinSi
 	Mientras Que (op_menu<1 o op_menu>i)
 	return <- op_menu
 FinFuncion
