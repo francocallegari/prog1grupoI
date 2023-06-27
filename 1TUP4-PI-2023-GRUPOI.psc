@@ -204,7 +204,7 @@ SubProceso registrarVenta(ventasDiarias, indiceVenta Por Referencia, productosDe
 	visualizarListado(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados) //consulto si quiere ver el listado de productos
 	
 	codProducto <- leerCodProducto(cantidadProductosRegistrados) //le pido al usuario que ingrese el codigo del producto
-
+	
 	indiceStock <- buscarElemento(productosPreciosCantidades,cantidadProductosRegistrados,0,codProducto); //busco el indice del codigo del producto para ver que stock tengo disponible
 	
 	Si productosPreciosCantidades[indiceStock,2]=0 Entonces
@@ -276,10 +276,10 @@ SubProceso registrarProducto(productosDescripcion, productosPreciosCantidades, c
 	Definir codProducto, stockProducto Como Entero
 	Definir nomProducto Como Caracter
 	Definir precioProducto Como Real
-
+	
 	Escribir "Ingrese el nombre del artículo"
 	Leer nomProducto
-
+	
 	Repetir
 		Escribir "Ingrese el precio del producto";
 		Leer precioProducto;
@@ -336,6 +336,8 @@ SubProceso modificarProducto(productosDescripcion, productosPreciosCantidades, c
 			Mientras Que Longitud(descripcionProducto)<=0
 			modificarArray(productosDescripcion, indiceProducto, 1, descripcionProducto)
 	Fin Segun
+	Escribir "Su producto ha sido modificado exitosamente"
+	Escribir "-----------------------------------"	
 FinSubProceso
 
 
@@ -354,7 +356,7 @@ SubProceso eliminarProducto(productosDescripcion, productosPreciosCantidades, ca
 	
 	actualizarArray(productosDescripcion,cantidadProductosRegistrados,2,indiceProducto, 0)
 	actualizarArray(productosPreciosCantidades,cantidadProductosRegistrados,3,indiceProducto, 1)
-
+	
 	cantidadProductosRegistrados<-cantidadProductosRegistrados-1;
 	Limpiar Pantalla;
 	Escribir "Su producto ha sido eliminado"
@@ -384,14 +386,8 @@ FinFuncion
 
 
 SubProceso modificarArray(array,fila,columna,nuevoValor)
-	Limpiar Pantalla;
-	Si fila >= 0 Entonces //modifico el valor del  producto seleccionado
-		array[fila,columna] <- nuevoValor
-		Escribir "Su producto ha sido modificado exitosamente"
-		Escribir "-----------------------------------"	
-	SiNo
-		Escribir "Producto no encontrado";
-	FinSi
+	Limpiar Pantalla; //modifico el valor del  producto seleccionado
+	array[fila,columna] <- nuevoValor
 FinSubProceso
 
 
