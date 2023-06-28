@@ -67,7 +67,7 @@ Proceso gestionFerreteria
 	menuDeStock[2,0] <- "3. Modificar precio de un producto"
 	menuDeStock[3,0] <- "4. Modificar descripción de un producto"
 	menuDeStock[4,0] <- "5. Eliminar Registro"
-	menuDeStock[5,0] <- "6. Volver al menú principal"
+	menuDeStock[5,0] <- "Si desea volver al menú principal, escriba Salir"
 	
 	definir cantidadProductosRegistrados como entero //Cantidad de productos que estan registrados, va a aumentar en caso de agregar nuevos
 	cantidadProductosRegistrados <- 4 //AUMENTARÁ SI REGISTRAMOS NUEVOS ARTÍCULOS
@@ -119,10 +119,13 @@ Funcion return<-menu(menuOpciones,i) //Retorna eleccion en el menu
 		si opcionElegida ==  palabraSalir Entonces
 			op_menu <- 6
 			eleccion <- verdadero
-			sino si ConvertirANumero(opcionElegida) > 0 y ConvertirANumero(opcionElegida) <= i
+		sino 
+			si opcionElegida<>"1" y opcionElegida<>"2" y opcionElegida<>"3" y opcionElegida<>"4" y opcionElegida<>"5" Entonces
+				eleccion <- Falso
+			sino 
 				op_menu <- ConvertirANumero(opcionElegida)
 				eleccion <- Verdadero
-			fin si
+			FinSi
 		FinSi
 	Mientras Que eleccion == falso
 	return <- op_menu
