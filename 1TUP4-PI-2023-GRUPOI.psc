@@ -8,7 +8,7 @@
 //https://github.com/francocallegari/prog1grupoI.git
 
 Proceso gestionFerreteria
-	Definir opcionMenu, opcionMenuStock Como Entero;
+	Definir opcionMenu, opcionMenuStock Como cadena;
 	Definir ventasDiarias como cadena //Areglo de registro de ventas
 	Dimension ventasDiarias[350,5]
 	definir indiceVenta Como Entero
@@ -76,58 +76,43 @@ Proceso gestionFerreteria
 	Repetir //Bucle para el menu
 		opcionMenu <- menu(menuPrincipal,6);
 		Segun opcionMenu Hacer
-			1: //Registrar Venta
+			"1": //Registrar Venta
 				registrarVenta(ventasDiarias, indiceVenta, productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
-			2: //Ver listado de productos ordenados por código
+			"2": //Ver listado de productos ordenados por código
 				ordernarArregloTextoASC(productosDescripcion,cantidadProductosRegistrados,2,0) //Se utilizan dos ordenamientos, uno para texto otro para reales.
 				ordernarArregloRealesASC(productosPreciosCantidades,cantidadProductosRegistrados,3,0)
 				listadoProductos(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados) //Se muestra el arreglo ordenado
-			3: //Ver resumen de ventas (Debe haber una venta registrada)
+			"3": //Ver resumen de ventas (Debe haber una venta registrada)
 				si indiceVenta > 0 Entonces
 					verResumenDiario(ventasDiarias,indiceVenta,5)
 				SiNo
 					Escribir "Debe registrar al menos una venta para ver el resumen";
 				FinSi				
-			4: //Modificacion del stock (Artículos, unidades, precios)
+			"4": //Modificacion del stock (Artículos, unidades, precios)
 				modificarStock(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados,menuDeStock)
-			5: //Buscar artículo por nombre
+			"5": //Buscar artículo por nombre
 				Escribir "Ingrese el nombre del artículo a buscar:"
 				Leer nombreABuscar
 				nombreArticulo <- buscarElemento(productosDescripcion,cantidadProductosRegistrados, 1,nombreABuscar)
 				Limpiar Pantalla
 				mostrarProductoNombre(productosDescripcion, productosPreciosCantidades, nombreArticulo)
-			6: //Salir
+			"salir": //Salir
 				Escribir "¡Saludos!"
 		Fin Segun
-	Hasta Que opcionMenu == 6
+	Hasta Que opcionMenu == "salir"
 FinProceso
 
 
 Funcion return<-menu(menuOpciones,i) //Retorna eleccion en el menu
-	Definir op_menu Como Entero;
-	definir opcionElegida como cadena
+	Definir op_menu Como cadena;
 	Definir palabraSalir como cadena 
 	palabraSalir <- "salir" //Palabra clave para salir del programa
-	definir eleccion como logico //Variable para salir del bucle
-	eleccion <- Falso
 	
-	Repetir
-		Escribir "Seleccione la opción que desee realizar: "
-		mostrarArray(menuOpciones,i,1)
-		leer opcionElegida
-		opcionElegida <- Minusculas(opcionElegida)
-		si opcionElegida ==  palabraSalir Entonces
-			op_menu <- 6
-			eleccion <- verdadero
-		sino 
-			si opcionElegida<>"1" y opcionElegida<>"2" y opcionElegida<>"3" y opcionElegida<>"4" y opcionElegida<>"5" Entonces
-				eleccion <- Falso
-			sino 
-				op_menu <- ConvertirANumero(opcionElegida)
-				eleccion <- Verdadero
-			FinSi
-		FinSi
-	Mientras Que eleccion == falso
+	Escribir "Seleccione la opción que desee realizar: "
+	mostrarArray(menuOpciones,i,1)
+	leer op_menu
+	op_menu <- Minusculas(op_menu)
+	
 	return <- op_menu
 FinFuncion
 
@@ -263,20 +248,20 @@ SubProceso modificarStock(productosDescripcion, productosPreciosCantidades Por R
 	Repetir //Bucle para el menu stock
 		opcionMenuStock <- menu(menuDeStock,6);
 		Segun opcionMenuStock Hacer
-			1: //Registrar producto nuevo
+			"1": //Registrar producto nuevo
 				registrarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
-			2: //Modifica stock de un producto
+			"2": //Modifica stock de un producto
 				modificarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados, 0)
-			3: //Modificar precio de un producto
+			"3": //Modificar precio de un producto
 				modificarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados, 1)
-			4: //Modificar descripción de un producto
+			"4": //Modificar descripción de un producto
 				modificarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados, 2)
-			5: //Elimino un registro
+			"5": //Elimino un registro
 				eliminarProducto(productosDescripcion, productosPreciosCantidades, cantidadProductosRegistrados)
-			6: //Retorno al menu principal
+			"salir": //Retorno al menu principal
 				Escribir "Regresando al menu principal..."
 		Fin Segun
-	Hasta Que opcionMenuStock == 6
+	Hasta Que opcionMenuStock == "salir"
 FinSubProceso
 
 
